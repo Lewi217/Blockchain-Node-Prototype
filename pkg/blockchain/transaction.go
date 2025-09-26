@@ -17,15 +17,25 @@ type Transaction struct {
 }
 
 type TxInput struct {
-	TxID        string `json:"tx_id"`         
-	OutputIndex int    `json:"output_index"`  
-	PublicKey   string `json:"public_key"`    
-	Signature   string `json:"signature"`  
+	TxID        string `json:"tx_id"`
+	OutputIndex int    `json:"output_index"`
+	PublicKey   string `json:"public_key"`
+	Signature   string `json:"signature"`
 }
 
 type TxOutput struct {
-	Value   int64  `json:"value"`   
-	Address string `json:"address"` 
+	Value   int64  `json:"value"`
+	Address string `json:"address"`
+}
+
+func NewTransaction(inputs []TxInput, outputs []TxOutput) *Transaction {
+	tx := &Transaction{
+		Inputs:    inputs,
+		Outputs:   outputs,
+		Timestamp: time.Now().Unix(),
+	}
+	tx.ID = tx.calculateID()
+	return tx
 }
 
 func NewCoinbaseTransaction(toAddress string, reward int64) *Transaction {
@@ -68,8 +78,7 @@ func (tx *Transaction) GetTotalInput() int64 {
 			return 0
 		}
 	}
-	return 0
-
+	return total
 }
 
 func (tx *Transaction) GetTotalOutput() int64 {
@@ -92,6 +101,7 @@ func (tx *Transaction) Validate() error {
 		}
 		return nil
 	}
+	
 	if len(tx.Inputs) == 0 {
 		return fmt.Errorf("transaction must have at least one input")
 	}
@@ -100,7 +110,6 @@ func (tx *Transaction) Validate() error {
 		return fmt.Errorf("transaction must have at least one output")
 	}
 	
-
 	for _, output := range tx.Outputs {
 		if output.Value <= 0 {
 			return fmt.Errorf("output value must be positive")
@@ -110,11 +119,9 @@ func (tx *Transaction) Validate() error {
 	return nil
 }
 
-
 func (tx *Transaction) Serialize() ([]byte, error) {
 	return json.Marshal(tx)
 }
-
 
 func DeserializeTransaction(data []byte) (*Transaction, error) {
 	var tx Transaction
@@ -122,8 +129,7 @@ func DeserializeTransaction(data []byte) (*Transaction, error) {
 	return &tx, err
 }
 
-
 func (tx *Transaction) String() string {
-	return fmt.Sprintf("Transaction{ID: %s, Inputs: %d, Outputs: %d, Timestamp: %d}", 
+	return fmt.Sprintf("Transaction{ID: %s, Inputs: %d, Outputs: %d, Timestamp: %d}",
 		tx.ID, len(tx.Inputs), len(tx.Outputs), tx.Timestamp)
 }

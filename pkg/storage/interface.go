@@ -49,3 +49,10 @@ func NewStorage(storageType StorageType, path string) (Storage, error) {
 		return NewMemoryStorage(), nil
 	}
 }
+
+// NewLevelDBStorage placeholder - implement if needed
+func NewLevelDBStorage(path string) (Storage, error) {
+	// For now, return memory storage as fallback
+	// You can implement actual LevelDB storage later
+	return NewMemoryStorage(), nil
+}
